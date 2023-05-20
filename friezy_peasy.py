@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import cv2, numpy as np, math
-from matplotlib import pyplot as plt
-from matplotlib import image as mp_image
-from PIL import Image as image
+import matplotlib.image as mp_image
 
 import argparse
 
@@ -40,30 +38,7 @@ def rangeDisplay01(im, flag_GLOBAL):
             im2[i][j][k] = (im2[i][j][k]-min)/dif
   return im2
 
-def saveImage(im, output_path, title='Result', factor=1, showFlag=True):  
-
-  # Normalize range
-  im2 = np.copy(im)
-  im2 = np.asarray(im2,float)
-  im2 = rangeDisplay01(im2,True)
-
-  # Display the image
-  if len(im2.shape) == 3:
-    # im has three channels
-    mp_image.imsave(output_path, im2)
-  else:
-    # im has a single channel
-    mp_image.imsave(output_path, im2, cmap='gray')
-    
-  figure_size = plt.gcf().get_size_inches()
-  plt.gcf().set_size_inches(factor * figure_size)
-  plt.title(title) #adding title
-  plt.xticks([]), plt.yticks([]) #axis label off
-
-  if showFlag:
-    mp_image.imsave(output_path, im2)
-
-def saveImageMI_ES(vim, output_path, title="", factor=1):
+def saveImage(vim, output_path):
   
   size = len(vim)
   if size <= MAX_LINE:
@@ -91,7 +66,12 @@ def saveImageMI_ES(vim, output_path, title="", factor=1):
       aux.append(np.hstack(auxvim))
     out = np.vstack(aux)
     out = np.asarray(out,float)
-  return saveImage(out, output_path, title, factor)
+
+  # Normalize range
+  im2 = np.copy(out)
+  im2 = np.asarray(im2, float)
+  im2 = rangeDisplay01(im2, True)
+  mp_image.imsave(output_path, im2)
 
 def buildFriso(im, type, nreps):
   """Generate the frieze image given its type and the number of repetitions
@@ -145,7 +125,7 @@ def buildFriso(im, type, nreps):
 if __name__ == '__main__':
 
   parser = argparse.ArgumentParser(
-    prog='freasy_peasy',
+    prog='friezy_peasy',
     description='Frieze images generator')
 
   pattern_choices = ['p1', 'p2', 'p1m1', 'p2mm', 'p11m', 'p11g', 'pcm']
@@ -176,4 +156,4 @@ if __name__ == '__main__':
   args = parser.parse_args()
   im = readIm(args.im_path, 1)
   output_im = buildFriso(im, args.pattern, args.nreps)
-  saveImageMI_ES(output_im, args.output_path, args.pattern, 2)
+  saveImage(output_im, args.output_path)
