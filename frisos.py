@@ -134,12 +134,27 @@ def rotateFigure(im):
     for i in range(nrow): #filas
       for j in range(ncol): #columnas
         for k in range(nrgb): #RGB
-          im2[i][j][k] = im[nrow-1-i][ncol-1-j][nrgb-1-k]
+          im2[i][j][k] = im[nrow-1-i][ncol-1-j][k]
   else:
     for i in range(nrow): #filas
       for j in range(ncol): #columnas
         im2[i][j] = im[nrow-1-i][ncol-1-j]
-  im2 = cv2.cvtColor(im2, cv2.COLOR_BGR2RGB)
+  return im2
+
+def reflexion(im):
+  im2 = np.copy(im)
+  nrow = im.shape[0]
+  ncol = im.shape[1]
+  if(len(im.shape)==3):
+    nrgb = im.shape[2]
+    for i in range(nrow): #filas
+      for j in range(ncol): #columnas
+        for k in range(nrgb): #RGB
+          im2[i][j][k] = im[i][ncol-1-j][k]
+  else:
+    for i in range(nrow): #filas
+      for j in range(ncol): #columnas
+        im2[i][j] = im[i][ncol-1-j]
   return im2
 
 def buildFriso(im, type):
@@ -154,9 +169,18 @@ def buildFriso(im, type):
       im3.append(im2)
     # im4 = traslacion(im3,2)
     displayMI_ES(im3, 'p2',2)
+  elif(type=='p1m1'):
+    im2 = reflexion(im)
+    # displayIm(im2, 'reflex')
+    im3 = []
+    for i in range(3):
+      im3.append(im)
+      im3.append(im2)
+    displayMI_ES(im3, 'p1m1',2)
   else:
     displayIm(im, 'original')
 
 im=readIm(get_image('zebra.jpg'), 1) # 1= a color ;  0 = blanco y negro
 buildFriso(im, 'p1')
 buildFriso(im, 'p2')
+buildFriso(im, 'p1m1')
