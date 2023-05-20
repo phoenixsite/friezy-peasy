@@ -99,9 +99,6 @@ def buildFriso(im, type, nreps):
   """
 
   result_image = []
-
-  # concat_function stores the function that generate the unit cell
-  # of the frieze for every repetition of the figure
   
   if(type == 'p1'):
     unit_cell = [im]
