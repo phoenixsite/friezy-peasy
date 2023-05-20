@@ -17,16 +17,14 @@ drive.mount('/content/drive')
 # %pwd
 import os
 # this definition allows to read files in a specific path
-get_image = lambda route: os.path.join('/content/drive/MyDrive/images', route)
+get_image = lambda route: os.path.join('/content/drive/MyDrive/TGT/images', route)
 
 import sys,os
 # Let's import the python module P0. 
 # You must create the directory CV and put inside the file P0.py
 # P0.py is the module created from your notebook P0.
-path_to_module='/content/drive/MyDrive/CV/'
+path_to_module='/content/drive/MyDrive/TGT/'
 sys.path.append(os.path.abspath(path_to_module))
-
-import P0
 
 # Commented out IPython magic to ensure Python compatibility.
 # We import the modules to use
