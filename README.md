@@ -1,6 +1,17 @@
 # friezy-peasy
 Friezes generator given an image in Python.
 
+## Set up
+We recomment using a [venv](https://docs.python.org/3/library/venv.html)
+environment to install the required packages and run the program. However,
+this is choosen by the user.
+
+First of all, some packages may need to be installed:
+
+```bash
+pip install -r requirements.txt
+```
+
 ## Usage
 ```console
 usage: friezy_peasy [-h] image-path destiny-path pattern N
