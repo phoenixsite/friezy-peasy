@@ -1,125 +1,100 @@
-# -*- coding: utf-8 -*-
+"""
+A frieze generator.
+"""
 
-import cv2, numpy as np, math
-import matplotlib.image as mp_image
+__docformat__ = 'restructuredtext'
+
+import cv2 as cv
+import numpy as np
 
 import argparse
 
-MAX_LINE = 20
+MAX_LINE = 60
 
-def readIm(filename, flagColor=1):
-
-  if(flagColor!=1 and flagColor!=0):
-    print("Valor no válido de flagColor, se asignará directamente el valor 1")
-    flagColor=1
-
-  return cv2.cvtColor(cv2.imread(filename,flagColor), cv2.COLOR_BGR2RGB)
-
-def rangeDisplay01(im, flag_GLOBAL):
-
-  #check image type (grayscale or color)
-  bands = len(im.shape)
-  max = np.max(im)
-  min = np.min(im)
-  dif = max-min
-  im2 = np.copy(im)
-  if (flag_GLOBAL==True or bands!=3):
-  # normalize the grayscale image
-  # compute range and apply normalization
-    im2 = (im2-min)/dif
-  else:
-    # normalize each band as a grayscale image 
-    for k in range(im2.shape[2]):
-      max = np.max(im2[:,:,k])
-      min = np.min(im[:,:,k])
-      dif = max-min
-      for i in range(im2.shape[1]): #columns
-          for j in range(im2.shape[2]): #RGB
-            im2[i][j][k] = (im2[i][j][k]-min)/dif
-  return im2
-
-def saveImage(vim, output_path):
-  
-  size = len(vim)
-  if size <= MAX_LINE:
-    out = np.hstack(vim)
-    out = np.asarray(out,float)
-  else:
-    times = round(size / MAX_LINE)
-    rest = size % MAX_LINE
-    if (rest >= MAX_LINE / 2):
-      times = times - 1
-    aux = []
-    for i in range(times):
-      auxvim = []
-      for j in range(MAX_LINE):
-        auxvim.append(vim[i * MAX_LINE + j])
-      aux.append(np.hstack(auxvim))
-    if(rest!=0):
-      #We have to add black figures to match the size of the rest of the arrays
-      blackimage = np.full((len(vim[0]),len(vim[0][0]),3),[0,0,0])
-      auxvim = []
-      for i in range(rest):
-        auxvim.append(vim[times * MAX_LINE +i])
-      for i in range(MAX_LINE - rest):
-        auxvim.append(blackimage)
-      aux.append(np.hstack(auxvim))
-    out = np.vstack(aux)
-    out = np.asarray(out,float)
-
-  # Normalize range
-  im2 = np.copy(out)
-  im2 = np.asarray(im2, float)
-  im2 = rangeDisplay01(im2, True)
-  mp_image.imsave(output_path, im2)
-
-def buildFriso(im, type, nreps):
-  """Generate the frieze image given its type and the number of repetitions
-  of the image.
+def saveImage(im, output_path):
   """
+  Save the generated image to a file.
 
-  result_image = []
+  :param im: Array of concatenated unit cells
+  :type im: numpy.ndarray
+  :param output_path: Path route where the image is saved.
+  :type: str
+  """
   
-  if(type == 'p1'):
+  im = np.hstack(im)
+  cv.imwrite(output_path, im)
+
+def buildFrieze(im, pattern, nreps):
+  """
+  Generate the frieze image given an UIC frieze pattern and the number
+  of repetitions of the image.
+
+  :param im: Image 
+  :type im: cv.Mat
+  :param pattern: UIC frieze pattern
+  :type pattern: str
+  :type nreps: Number of times the unit cell is repeated along the
+  frieze.
+  :rparam Array of concatenated unit cells that represents the frieze.
+  :rtype list
+  """
+  
+  if(pattern == 'p1'):
     unit_cell = [im]
     
-  elif(type == 'p2'):
-    im2 = cv2.rotate(im,cv2.ROTATE_180)
+  elif(pattern == 'p2'):
+    
+    im2 = cv.rotate(im, cv.ROTATE_180)
     unit_cell = [im, im2]
     
-  elif(type=='p1m1'):
-    im2 = cv2.flip(im, 1)     #1=reflexión con recta vertical, 0 = reflexión con recta horizontal
+  elif(pattern == 'p1m1'):
+    
+    # 1 = vertical line reflection
+    # 0 = horizontal line reflection
+    im2 = cv.flip(im, 1)
     unit_cell = [im, im2]
     
-  elif(type=='p2mm'):
-    im2 = cv2.flip(im,0)
-    im3 = np.concatenate((im,im2), axis=0)  #Pegar 2 imágenes verticalmente
-    im4 = np.flip(im3,1)
+  elif(pattern == 'p2mm'):
+    
+    im2 = cv.flip(im, 0)
+
+    # Snap vertically two images
+    im3 = np.concatenate((im, im2), axis=0)
+    im4 = np.flip(im3, 1)
     unit_cell = [im3, im4]
 
-  elif(type=='p11m'):
-    im2 = cv2.flip(im,0)
-    im3 = np.concatenate((im,im2), axis=0)
+  elif(pattern == 'p11m'):
+    
+    im2 = cv.flip(im, 0)
+    im3 = np.concatenate((im, im2), axis=0)
     unit_cell = [im3]
 
-  elif(type=='p11g'):
-    im2 = cv2.flip(im,0)
-    firsthalf = im2[:,0:int(im2.shape[1]/2)]
-    secondhalf = im2[:,int(im2.shape[1]/2):int(im2.shape[1])]
-    im3 = np.concatenate((secondhalf,firsthalf), axis=1)    #Pegar 2 imágenes horizontalmente
+  elif(pattern == 'p11g'):
+    
+    im2 = cv.flip(im, 0)
+    firsthalf = im2[:, 0:int(im2.shape[1] / 2)]
+    secondhalf = im2[: ,int(im2.shape[1] / 2):int(im2.shape[1])]
+
+    # Snap horizontally two images
+    im3 = np.concatenate((secondhalf,firsthalf), axis=1)
     im4 = np.concatenate((im,im3), axis=0)
     unit_cell = [im4]
     
-  elif(type=='pcm'):
-    im2 = cv2.flip(im,1)
-    im3 = np.concatenate((im,im2), axis=1)
-    im4 = cv2.rotate(im3, cv2.ROTATE_180)
+  elif(pattern == 'pcm'):
+    
+    im2 = cv.flip(im, 1)
+    im3 = np.concatenate((im, im2), axis=1)
+    im4 = cv.rotate(im3, cv.ROTATE_180)
     unit_cell = [im3, im4]
 
-  for i in range(nreps):
-    result_image.extend(unit_cell)
+  else:
+    raise RuntimeException("The given pattern is not valid")
 
-  return result_image
+  out = []
+  for i in range(nreps):
+    out.extend(unit_cell)
+
+  return out
 
 
 if __name__ == '__main__':
@@ -154,6 +129,6 @@ if __name__ == '__main__':
     help='Number of times the resulting frieze image will be repeated.')
 
   args = parser.parse_args()
-  im = readIm(args.im_path, 1)
-  output_im = buildFriso(im, args.pattern, args.nreps)
+  im = cv.imread(args.im_path)
+  output_im = buildFrieze(im, args.pattern, args.nreps)
   saveImage(output_im, args.output_path)
