@@ -1,0 +1,31 @@
+<h1 id="friezy-peasy">friezy-peasy</h1>
+<p>Python frieze generator.</p>
+<h2 id="set-up">Set up</h2>
+<p>We recomment using a <a
+href="https://docs.python.org/3/library/venv.html">venv</a> environment
+to install the required packages and run the program. However, this is
+choosen by the user.</p>
+<p>First of all, some packages may need to be installed:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install <span class="at">-r</span> requirements.txt</span></code></pre></div>
+<h2 id="usage">Usage</h2>
+<p>The <a
+href="https://en.wikipedia.org/wiki/Hermann%E2%80%93Mauguin_notation">Hermann-Mauguin
+notation</a> is used to describe the <a
+href="https://en.wikipedia.org/wiki/Frieze_group#Descriptions_of_the_seven_frieze_groups">seven
+frieze groups</a>.</p>
+<pre class="console"><code>usage: friezy_peasy [-h] image-path destiny-path pattern N
+
+Frieze images generator
+
+positional arguments:
+  image-path    Path to the image used to generate the frieze.
+  destiny-path  Path to the file where the generated image will be saved.
+  pattern       IUCr frieze pattern group that will be used to generate the frieze.
+  N             Number of times the resulting frieze image will be repeated.
+
+options:
+  -h, --help    show this help message and exit</code></pre>
+<p>To generate a p2 (only halfturns) frieze with six repetitions of the
+motif:
+<code>console   python3 -m friezy_peasy img/image.jpg dest/result.jpg p2 6</code></p>
